@@ -1,0 +1,122 @@
+{
+ "language_model.model.layers.11.self_attn.attn": {
+  "kv_tensor_rms": {
+   "k": 1.3501226902008057,
+   "v": 0.4572642147541046,
+   "k_amax": 14.5625,
+   "v_amax": 8.5625
+  },
+  "kv_per_tensor": {
+   "rel_l2": 0.023864002898335457,
+   "max_abs_over_rms": 2.1968603134155273
+  },
+  "kv_per_head": {
+   "rel_l2": 0.020436691120266914,
+   "max_abs_over_rms": 1.025049090385437
+  },
+  "kv_per_token": {
+   "rel_l2": 0.01771942339837551,
+   "max_abs_over_rms": 0.6783918738365173
+  },
+  "k_per_token_v_per_channel": {
+   "rel_l2": 0.017825089395046234,
+   "max_abs_over_rms": 0.6684691309928894
+  },
+  "k_per_token_v_block64_channel": {
+   "rel_l2": 0.017402606084942818,
+   "max_abs_over_rms": 0.5872331857681274
+  },
+  "q_per_token+kv_as_above+p_None": {
+   "rel_l2": 0.02104993723332882,
+   "max_abs_over_rms": 0.9449506402015686
+  },
+  "q_per_token+kv_as_above+p_row": {
+   "rel_l2": 0.021726667881011963,
+   "max_abs_over_rms": 0.9386773109436035
+  },
+  "q_per_token+kv_as_above+p_block64": {
+   "rel_l2": 0.021347740665078163,
+   "max_abs_over_rms": 0.9448209404945374
+  }
+ },
+ "language_model.model.layers.35.self_attn.attn": {
+  "kv_tensor_rms": {
+   "k": 1.5994101762771606,
+   "v": 1.037585735321045,
+   "k_amax": 19.75,
+   "v_amax": 38.25
+  },
+  "kv_per_tensor": {
+   "rel_l2": 0.017444629222154617,
+   "max_abs_over_rms": 1.5872224569320679
+  },
+  "kv_per_head": {
+   "rel_l2": 0.01603340171277523,
+   "max_abs_over_rms": 1.2706871032714844
+  },
+  "kv_per_token": {
+   "rel_l2": 0.014333573170006275,
+   "max_abs_over_rms": 0.987131655216217
+  },
+  "k_per_token_v_per_channel": {
+   "rel_l2": 0.014532397501170635,
+   "max_abs_over_rms": 0.9943837523460388
+  },
+  "k_per_token_v_block64_channel": {
+   "rel_l2": 0.014245165511965752,
+   "max_abs_over_rms": 0.9952595829963684
+  },
+  "q_per_token+kv_as_above+p_None": {
+   "rel_l2": 0.024410683661699295,
+   "max_abs_over_rms": 4.198289394378662
+  },
+  "q_per_token+kv_as_above+p_row": {
+   "rel_l2": 0.024852976202964783,
+   "max_abs_over_rms": 4.208130836486816
+  },
+  "q_per_token+kv_as_above+p_block64": {
+   "rel_l2": 0.02460690587759018,
+   "max_abs_over_rms": 4.206841468811035
+  }
+ },
+ "language_model.model.layers.63.self_attn.attn": {
+  "kv_tensor_rms": {
+   "k": 1.5341590642929077,
+   "v": 5.315989971160889,
+   "k_amax": 12.875,
+   "v_amax": 113.0
+  },
+  "kv_per_tensor": {
+   "rel_l2": 0.011545131914317608,
+   "max_abs_over_rms": 0.5347721576690674
+  },
+  "kv_per_head": {
+   "rel_l2": 0.011497762985527515,
+   "max_abs_over_rms": 0.9386997818946838
+  },
+  "kv_per_token": {
+   "rel_l2": 0.01115693710744381,
+   "max_abs_over_rms": 0.3652872145175934
+  },
+  "k_per_token_v_per_channel": {
+   "rel_l2": 0.011435769498348236,
+   "max_abs_over_rms": 0.6236239075660706
+  },
+  "k_per_token_v_block64_channel": {
+   "rel_l2": 0.01079148892313242,
+   "max_abs_over_rms": 0.3081769645214081
+  },
+  "q_per_token+kv_as_above+p_None": {
+   "rel_l2": 0.012339415960013866,
+   "max_abs_over_rms": 0.6927027106285095
+  },
+  "q_per_token+kv_as_above+p_row": {
+   "rel_l2": 0.01327181700617075,
+   "max_abs_over_rms": 0.6738817691802979
+  },
+  "q_per_token+kv_as_above+p_block64": {
+   "rel_l2": 0.012502887286245823,
+   "max_abs_over_rms": 0.6923304200172424
+  }
+ }
+}

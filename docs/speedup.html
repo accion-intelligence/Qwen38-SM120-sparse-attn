@@ -1,0 +1,261 @@
+<title>Qwen3.8 SM120 加速对比</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: single reading column, two stacked chart panels, numbers in a monospace utility face. */
+  :root {
+    --bg: #f7f7f4;
+    --surface: #ffffff;
+    --fg: #15161a;
+    --fg-2: #4d5058;
+    --fg-3: #7c8089;
+    --line: #e2e3df;
+    --grid: #ebece8;
+    --ref: #9a9ea8;
+    --s1: #2a78d6;   /* BF16 kernel, 全量 */
+    --s2: #eb6834;   /* FP8 kernel, 全量 */
+    --s3: #1baf7a;   /* BF16 kernel + 稀疏 */
+    --s4: #eda100;   /* FP8 kernel + 稀疏 */
+    --s5: #8b5cf6;   /* FP8 kernel 流水优化版 */
+    --s6: #d6336c;   /* FP8 GEMM */
+    --tip-bg: #15161a;
+    --tip-fg: #ffffff;
+    --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141516; --surface: #1c1d1f; --fg: #f2f2ef; --fg-2: #c3c4bc; --fg-3: #8f9199;
+      --line: #2e3034; --grid: #26282b; --ref: #6c7079;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #a78bfa; --s6: #e0527f;
+      --tip-bg: #f2f2ef; --tip-fg: #15161a; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141516; --surface: #1c1d1f; --fg: #f2f2ef; --fg-2: #c3c4bc; --fg-3: #8f9199;
+    --line: #2e3034; --grid: #26282b; --ref: #6c7079;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #a78bfa; --s6: #e0527f;
+    --tip-bg: #f2f2ef; --tip-fg: #15161a; color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+  .wrap { max-width: 980px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 48px; }
+  header h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; letter-spacing: 0.01em; text-wrap: balance; }
+  header p { margin: 0; color: var(--fg); max-width: 70ch; font-size: 15px; }
+  .heroes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 22px 0 8px; }
+  .hero { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; min-width: 0; }
+  .hero .label { font-size: 14px; color: var(--fg); }
+  .hero .value { font-family: var(--font-num); font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .hero .sub { font-size: 14px; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .hero .sub span { display: block; white-space: nowrap; }
+  .hero .label { white-space: nowrap; }
+  /* never break a phrase in the middle: legend items, table cells and labels wrap only at spaces */
+  .legend span, th, td { word-break: keep-all; overflow-wrap: normal; }
+  .legend span { white-space: nowrap; }
+  td { white-space: nowrap; }
+  th { white-space: nowrap; }
+  .intro, .notes li, header p { text-wrap: pretty; }
+  section.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 18px 14px; margin-top: 20px; }
+  .panel h2 { font-size: 17px; font-weight: 700; margin: 0 0 2px; }
+  .panel .sub { color: var(--fg-2); font-size: 13px; margin: 0 0 10px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 4px 0 10px; font-size: 13px; color: var(--fg-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .chart { position: relative; width: 100%; }
+  .chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart text { font-family: var(--font-num); font-variant-numeric: tabular-nums; fill: var(--fg-2); }
+  .chart .cat { font-family: var(--font-body); fill: var(--fg); font-size: 13px; }
+  .chart .cap { fill: var(--fg); font-size: 12px; font-weight: 500; }
+  .chart .axis { font-size: 11px; fill: var(--fg-3); }
+  .chart .ref-label { font-size: 11px; fill: var(--fg-3); font-family: var(--font-body); }
+  .chart rect.hit { fill: transparent; cursor: default; }
+  .tip { position: absolute; pointer-events: none; background: var(--tip-bg); color: var(--tip-fg); padding: 6px 9px; border-radius: 4px; font-size: 12px; line-height: 1.45; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); opacity: 0; transition: opacity .12s; font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+  .tip b { font-family: var(--font-body); font-weight: 500; }
+  .tip.on { opacity: 1; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--fg-2); font-size: 13px; }
+  summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+  .tbl { overflow-x: auto; margin-top: 8px; }
+  table { border-collapse: collapse; font-size: 13px; min-width: 100%; }
+  th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-num); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; font-family: var(--font-body); }
+  th { color: var(--fg-3); font-weight: 500; font-family: var(--font-body); }
+  .notes { font-size: 14px; color: var(--fg); margin: 12px 0 0; padding-left: 18px; max-width: 80ch; }
+  .intro { font-size: 14px; color: var(--fg); margin: 4px 0 10px; max-width: 80ch; }
+  .notes li { margin: 3px 0; }
+  footer { color: var(--fg-3); font-size: 12px; margin-top: 22px; }
+  @media (max-width: 640px) {
+    .heroes { grid-template-columns: 1fr; }
+    header h1 { font-size: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tip { transition: none; } }
+  /* PDF / print: continuous blocks must not be split across pages */
+  @media print {
+    :root { --bg: #ffffff; --surface: #ffffff; }
+    body { background: #fff; }
+    header, .heroes, .hero, section.panel, .legend, .chart, .tbl, table, details, ul.notes, footer {
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    h1, h2, .intro, .legend, summary { break-after: avoid; page-break-after: avoid; }
+    section.panel { margin-top: 14px; }
+    section.panel + section.panel { break-before: page; page-break-before: always; }
+    .chart svg { max-height: 300px; }
+    table { font-size: 10.5px; width: 100%; }
+    th { white-space: normal; }
+    .heroes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .chart .tip { display: none !important; }
+    a[href]::after { content: none; }
+    /* zero page margins suppress the browser's printed header/footer (URL, date, page number);
+       the page keeps its own margins through body padding */
+    @page { margin: 0; }
+    body { padding: 14mm 12mm !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Qwen3.8-27B 在 RTX PRO 6000 Blackwell 上的定制部署方案：加速比</h1>
+    <p>单张显卡，输入为 64K～256K token 的长文档。对比对象是未经改动的 vLLM 0.30（下文称"原版"）。首 token 时间（TTFT）指从收到请求到生成第一个 token 的时间。</p>
+  </header>
+
+  <div class="heroes">
+    <div class="hero"><div class="label">64K 输入，首 token 时间</div><div class="value">1.81×</div><div class="sub"><span>原版 12.06 s</span><span>全 FP8 方案 6.68 s</span></div></div>
+    <div class="hero"><div class="label">128K 输入，首 token 时间</div><div class="value">1.98×</div><div class="sub"><span>原版 30.17 s</span><span>全 FP8 方案 15.20 s</span></div></div>
+    <div class="hero"><div class="label">256K 输入，首 token 时间</div><div class="value">2.26×</div><div class="sub"><span>原版 81.66 s</span><span>全 FP8 方案 36.16 s</span></div></div>
+  </div>
+
+  <section class="panel" id="attn">
+    <h2>Attention 计算：自定义 kernel 对原版 vLLM attention kernel 的加速比</h2>
+    <p class="intro">"全量"指每个 query 对所有 key 计算；"稀疏"指按每个注意力头只计算贡献最大的 64×64 块，保留 95% 的注意力质量，实际参与计算的块在 64K/128K/256K 输入下占 50%/48%/44%。</p>
+    <div class="legend" id="legend-attn"></div>
+    <div class="chart" id="chart-attn"></div>
+    <details><summary>数据表</summary><div class="tbl" id="table-attn"></div></details>
+    <ul class="notes">
+      <li>FP8 kernel 用 8 位浮点（e4m3）做 attention 的矩阵乘，速度是 BF16 的约 2 倍；"流水优化版"进一步用 TMA 异步加载和多级流水，把张量核心的利用率从 75% 提到 84%。</li>
+      <li>稀疏带来的加速与参与计算的块占比成反比；块选择本身的开销（每层约 1～2 ms）未计入本图，已计入下方的端到端结果。</li>
+    </ul>
+  </section>
+
+  <section class="panel" id="e2e">
+    <h2>端到端：首 token 时间对原版 vLLM 的加速比</h2>
+    <p class="intro">前四个方案逐步叠加：① MLP 的 gate/SwiGLU 融合 → ② 稀疏 attention（BF16 kernel）→ ③ 换 FP8 attention kernel → ④ FP8 kernel 流水优化版（方案 A）。方案 B 是稀疏 BF16 attention 加 FP8 矩阵乘（GEMM），方案 C 是全 FP8（FP8 attention 加 FP8 GEMM）。每个数据点为预热后两次测量的平均。</p>
+    <div class="legend" id="legend-e2e"></div>
+    <div class="chart" id="chart-e2e"></div>
+    <details><summary>数据表（含两条请求并发）</summary><div class="tbl" id="table-e2e"></div></details>
+    <ul class="notes">
+      <li>attention 在首 token 时间中的占比随输入长度增长（64K 约 22%，256K 约 55%），其余主要是矩阵乘。所以 attention kernel 提速 3 倍在 64K 只换来约 20% 的端到端收益，而 FP8 矩阵乘的收益更大。</li>
+      <li>输出质量：把原版 BF16 生成的 256 个 token 逐个交给各方案打分，三个方案的平均负对数似然差都在 0.01 以内，首选 token 一致率 97%～99%，藏在长文档里的信息全部检索正确。误差主要来自 FP8 矩阵乘，FP8 attention 几乎不增加误差。</li>
+      <li>两条 256K 请求并发时原版需要 172 s，是因为原版的显存放不下两条 256K 的上下文，第二条要排队；该行以融合版为对照。</li>
+      <li>prefill 每步处理 12032 个 token（而不是 8192）可以让 attention kernel 的线程块数恰好填满 GPU，全 FP8 方案的首 token 时间再快约 2%。</li>
+    </ul>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  // PDF export: open the collapsed data tables so they are included, then restore
+  const opened = [];
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('details:not([open])').forEach(d => { d.open = true; opened.push(d); });
+  });
+  window.addEventListener('afterprint', () => { opened.splice(0).forEach(d => { d.open = false; }); });
+  const groups = ['64K', '128K', '256K'];
+  const attn = {
+    series: [
+      { name: 'BF16 kernel，全量', color: 'var(--s1)', values: [1.11, 1.11, 1.11] },
+      { name: 'FP8 kernel，全量', color: 'var(--s2)', values: [1.75, 1.75, 1.75] },
+      { name: 'BF16 kernel + 稀疏', color: 'var(--s3)', values: [2.11, 2.20, 2.36] },
+      { name: 'FP8 kernel + 稀疏', color: 'var(--s4)', values: [3.32, 3.47, 3.72] },
+      { name: 'FP8 kernel 流水优化版 + 稀疏', color: 'var(--s5)', values: [4.26, 4.44, 4.85] },
+    ],
+    ymax: 5, ticks: [0, 1, 2, 3, 4, 5],
+  };
+  const e2e = {
+    series: [
+      { name: '① gate/SwiGLU 融合', color: 'var(--s1)', values: [1.030, 1.025, 1.016] },
+      { name: '② + 稀疏 attention（BF16）', color: 'var(--s3)', values: [1.145, 1.256, 1.418] },
+      { name: '③ + FP8 attention kernel', color: 'var(--s4)', values: [1.189, 1.333, 1.570] },
+      { name: 'A：④ FP8 kernel 流水优化版', color: 'var(--s5)', values: [1.207, 1.373, 1.652] },
+      { name: 'B：稀疏 BF16 attention + FP8 GEMM', color: 'var(--s2)', values: [1.672, 1.741, 1.842] },
+      { name: 'C：全 FP8', color: 'var(--s6)', values: [1.807, 1.985, 2.259] },
+    ],
+    ymax: 2.5, ticks: [0, 0.5, 1.0, 1.5, 2.0, 2.5],
+  };
+
+  function legend(el, spec) {
+    el.innerHTML = spec.series.map(s => `<span><i style="background:${s.color}"></i>${s.name}</span>`).join('');
+  }
+
+  function chart(el, spec) {
+    const W = 920, H = 340, padL = 44, padR = 12, padT = 18, padB = 40;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const n = spec.series.length;
+    const groupW = plotW / groups.length;
+    const barW = Math.min(24, (groupW * 0.72 - 2 * (n - 1)) / n);
+    const y = v => padT + plotH - (v / spec.ymax) * plotH;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="分组柱状图">`;
+    spec.ticks.forEach(t => {
+      const yy = y(t);
+      svg += `<line x1="${padL}" x2="${W - padR}" y1="${yy}" y2="${yy}" stroke="var(--grid)" stroke-width="1"/>`;
+      svg += `<text class="axis" x="${padL - 8}" y="${yy + 4}" text-anchor="end">${t.toFixed(t % 1 ? 1 : 0)}×</text>`;
+    });
+    const y1 = y(1);
+    svg += `<line x1="${padL}" x2="${W - padR}" y1="${y1}" y2="${y1}" stroke="var(--ref)" stroke-width="1"/>`;
+    svg += `<text class="ref-label" x="${W - padR}" y="${y1 - 5}" text-anchor="end">基线 1×</text>`;
+    svg += `<line x1="${padL}" x2="${W - padR}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" stroke-width="1"/>`;
+    groups.forEach((g, gi) => {
+      const total = n * barW + (n - 1) * 2;
+      const x0 = padL + gi * groupW + (groupW - total) / 2;
+      spec.series.forEach((s, si) => {
+        const v = s.values[gi];
+        const x = x0 + si * (barW + 2);
+        const top = y(v), base = y(0), r = 4;
+        const h = base - top;
+        const d = `M${x},${base} V${top + r} a${r},${r} 0 0 1 ${r},-${r} H${x + barW - r} a${r},${r} 0 0 1 ${r},${r} V${base} Z`;
+        svg += `<path d="${d}" fill="${s.color}"/>`;
+        svg += `<text class="cap" x="${x + barW / 2}" y="${top - 6}" text-anchor="middle">${v.toFixed(2)}</text>`;
+        svg += `<rect class="hit" x="${x - 3}" y="${padT}" width="${barW + 6}" height="${plotH}" data-g="${g}" data-s="${s.name}" data-v="${v.toFixed(2)}" data-cx="${x + barW / 2}" data-cy="${top}"/>`;
+        void h;
+      });
+      svg += `<text class="cat" x="${padL + gi * groupW + groupW / 2}" y="${H - 14}" text-anchor="middle">${g} 输入</text>`;
+    });
+    svg += `</svg><div class="tip" role="status"></div>`;
+    el.innerHTML = svg;
+    const tip = el.querySelector('.tip');
+    const svgEl = el.querySelector('svg');
+    el.querySelectorAll('rect.hit').forEach(h => {
+      h.addEventListener('mouseenter', () => {
+        const box = svgEl.getBoundingClientRect();
+        const sx = box.width / W, sy = box.height / H;
+        tip.innerHTML = `<b>${h.dataset.s}</b><br>${h.dataset.g} 输入：${h.dataset.v}×`;
+        tip.style.left = (parseFloat(h.dataset.cx) * sx) + 'px';
+        tip.style.top = (parseFloat(h.dataset.cy) * sy) + 'px';
+        tip.classList.add('on');
+      });
+      h.addEventListener('mouseleave', () => tip.classList.remove('on'));
+    });
+  }
+
+  function table(el, head, rows) {
+    el.innerHTML = `<table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+
+  legend(document.getElementById('legend-attn'), attn);
+  chart(document.getElementById('chart-attn'), attn);
+  table(document.getElementById('table-attn'), ['输入长度', '稀疏后参与计算的块占比', 'BF16 全量', 'FP8 全量', 'BF16 + 稀疏', 'FP8 + 稀疏', 'FP8 流水优化版 全量', 'FP8 流水优化版 + 稀疏'], [
+    ['64K', '50%', '1.11×', '1.75×', '2.11×', '3.32×', '2.26×', '4.26×'],
+    ['128K', '48%', '1.11×', '1.75×', '2.20×', '3.47×', '2.26×', '4.44×'],
+    ['256K', '44%', '1.11×', '1.75×', '2.36×', '3.72×', '2.26×', '4.85×'],
+  ]);
+
+  legend(document.getElementById('legend-e2e'), e2e);
+  chart(document.getElementById('chart-e2e'), e2e);
+  table(document.getElementById('table-e2e'), ['输入与并发', '原版', '① 融合', '② + 稀疏 BF16', '③ + FP8 kernel', 'A', 'B', 'C', 'C 对原版'], [
+    ['64K，1 条请求', '12.06 s', '11.72 s', '10.54 s', '10.14 s', '9.99 s', '7.22 s', '6.68 s', '1.81×'],
+    ['64K，2 条并发', '18.70 s', '18.14 s', '16.43 s', '15.99 s', '15.78 s', '11.17 s', '10.48 s', '1.78×'],
+    ['128K，1 条请求', '30.17 s', '29.43 s', '24.01 s', '22.63 s', '21.97 s', '17.33 s', '15.20 s', '1.98×'],
+    ['128K，2 条并发', '45.77 s', '44.68 s', '36.15 s', '34.36 s', '33.47 s', '25.77 s', '23.14 s', '1.98×'],
+    ['256K，1 条请求', '81.66 s', '80.37 s', '57.60 s', '52.02 s', '49.45 s', '44.33 s', '36.16 s', '2.26×'],
+    ['256K，2 条并发', '172.20 s（显存放不下，排队）', '121.64 s', '82.45 s', '76.41 s', '73.33 s', '62.22 s', '52.80 s', '2.30×（对融合）'],
+  ]);
+})();
+</script>

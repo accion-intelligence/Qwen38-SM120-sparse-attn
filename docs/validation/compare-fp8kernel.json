@@ -1,0 +1,58 @@
+{
+ "tau=0.95": [
+  {
+   "prompt": "docs_needle-65536",
+   "kept": 0.49740162422986534,
+   "first_token_same": true,
+   "common_prefix": 363,
+   "agree": 365,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-131072",
+   "kept": 0.4761250900683101,
+   "first_token_same": true,
+   "common_prefix": 159,
+   "agree": 159,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-260096",
+   "kept": 0.4432213703211712,
+   "first_token_same": true,
+   "common_prefix": 130,
+   "agree": 131,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-65536",
+   "kept": 0.0,
+   "first_token_same": true,
+   "common_prefix": 66,
+   "agree": 70,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-131072",
+   "kept": 0.0,
+   "first_token_same": true,
+   "common_prefix": 159,
+   "agree": 160,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-260096",
+   "kept": 0.0,
+   "first_token_same": true,
+   "common_prefix": 141,
+   "agree": 143,
+   "needle_dense": true,
+   "needle_sparse": true
+  }
+ ]
+}

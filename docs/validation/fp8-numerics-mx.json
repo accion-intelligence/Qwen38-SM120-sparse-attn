@@ -1,0 +1,182 @@
+{
+ "language_model.model.layers.11.self_attn.attn": {
+  "kv_tensor_rms": {
+   "k": 1.351117730140686,
+   "v": 0.4693422317504883,
+   "k_amax": 14.5625,
+   "v_amax": 8.5625
+  },
+  "kv_per_tensor": {
+   "rel_l2": 0.023105373606085777,
+   "max_abs_over_rms": 1.4086706638336182
+  },
+  "kv_per_head": {
+   "rel_l2": 0.022777291014790535,
+   "max_abs_over_rms": 0.7039761543273926
+  },
+  "kv_per_token": {
+   "rel_l2": 0.021418899297714233,
+   "max_abs_over_rms": 0.5446301102638245
+  },
+  "k_per_token_v_per_channel": {
+   "rel_l2": 0.021716658025979996,
+   "max_abs_over_rms": 0.730103075504303
+  },
+  "k_per_token_v_block64_channel": {
+   "rel_l2": 0.020873213186860085,
+   "max_abs_over_rms": 0.57911616563797
+  },
+  "kv_mx32": {
+   "rel_l2": 0.02362593449652195,
+   "max_abs_over_rms": 0.8473373055458069
+  },
+  "k_mx32_v_per_channel": {
+   "rel_l2": 0.02360164374113083,
+   "max_abs_over_rms": 0.7908449172973633
+  },
+  "q_per_token+kv_as_above+p_None": {
+   "rel_l2": 0.02476019226014614,
+   "max_abs_over_rms": 0.773747444152832
+  },
+  "q_per_token+kv_as_above+p_row": {
+   "rel_l2": 0.025576654821634293,
+   "max_abs_over_rms": 0.768180251121521
+  },
+  "q_per_token+kv_as_above+p_block64": {
+   "rel_l2": 0.025139879435300827,
+   "max_abs_over_rms": 0.7690418362617493
+  },
+  "prod_all_per_tensor+p_row": {
+   "rel_l2": 0.027336157858371735,
+   "max_abs_over_rms": 1.389365315437317
+  },
+  "mxf8_all": {
+   "rel_l2": 0.030397769063711166,
+   "max_abs_over_rms": 1.2280828952789307
+  },
+  "sw_qk_per_token_v_per_channel+p_row": {
+   "rel_l2": 0.025576654821634293,
+   "max_abs_over_rms": 0.768180251121521
+  }
+ },
+ "language_model.model.layers.35.self_attn.attn": {
+  "kv_tensor_rms": {
+   "k": 1.6035478115081787,
+   "v": 1.1247466802597046,
+   "k_amax": 19.75,
+   "v_amax": 38.25
+  },
+  "kv_per_tensor": {
+   "rel_l2": 0.023152535781264305,
+   "max_abs_over_rms": 2.2037346363067627
+  },
+  "kv_per_head": {
+   "rel_l2": 0.022988369688391685,
+   "max_abs_over_rms": 1.108802318572998
+  },
+  "kv_per_token": {
+   "rel_l2": 0.02008754387497902,
+   "max_abs_over_rms": 0.9066226482391357
+  },
+  "k_per_token_v_per_channel": {
+   "rel_l2": 0.02028806321322918,
+   "max_abs_over_rms": 0.8876913785934448
+  },
+  "k_per_token_v_block64_channel": {
+   "rel_l2": 0.01994703710079193,
+   "max_abs_over_rms": 0.8860771656036377
+  },
+  "kv_mx32": {
+   "rel_l2": 0.02795465849339962,
+   "max_abs_over_rms": 4.327469825744629
+  },
+  "k_mx32_v_per_channel": {
+   "rel_l2": 0.027207475155591965,
+   "max_abs_over_rms": 3.6309220790863037
+  },
+  "q_per_token+kv_as_above+p_None": {
+   "rel_l2": 0.026191769167780876,
+   "max_abs_over_rms": 4.972006797790527
+  },
+  "q_per_token+kv_as_above+p_row": {
+   "rel_l2": 0.02685033343732357,
+   "max_abs_over_rms": 4.982503414154053
+  },
+  "q_per_token+kv_as_above+p_block64": {
+   "rel_l2": 0.026524117216467857,
+   "max_abs_over_rms": 4.980472564697266
+  },
+  "prod_all_per_tensor+p_row": {
+   "rel_l2": 0.03211693465709686,
+   "max_abs_over_rms": 6.414083003997803
+  },
+  "mxf8_all": {
+   "rel_l2": 0.03749653697013855,
+   "max_abs_over_rms": 11.294458389282227
+  },
+  "sw_qk_per_token_v_per_channel+p_row": {
+   "rel_l2": 0.02685033343732357,
+   "max_abs_over_rms": 4.982503414154053
+  }
+ },
+ "language_model.model.layers.63.self_attn.attn": {
+  "kv_tensor_rms": {
+   "k": 1.5171072483062744,
+   "v": 5.3032708168029785,
+   "k_amax": 12.9375,
+   "v_amax": 113.0
+  },
+  "kv_per_tensor": {
+   "rel_l2": 0.010864925570786,
+   "max_abs_over_rms": 0.4027355909347534
+  },
+  "kv_per_head": {
+   "rel_l2": 0.010942602530121803,
+   "max_abs_over_rms": 0.3739313781261444
+  },
+  "kv_per_token": {
+   "rel_l2": 0.010516183450818062,
+   "max_abs_over_rms": 0.2729610502719879
+  },
+  "k_per_token_v_per_channel": {
+   "rel_l2": 0.01098518818616867,
+   "max_abs_over_rms": 0.30704349279403687
+  },
+  "k_per_token_v_block64_channel": {
+   "rel_l2": 0.010576047003269196,
+   "max_abs_over_rms": 0.29993191361427307
+  },
+  "kv_mx32": {
+   "rel_l2": 0.010896380059421062,
+   "max_abs_over_rms": 0.3870444893836975
+  },
+  "k_mx32_v_per_channel": {
+   "rel_l2": 0.01058084238320589,
+   "max_abs_over_rms": 0.3480963408946991
+  },
+  "q_per_token+kv_as_above+p_None": {
+   "rel_l2": 0.012092700228095055,
+   "max_abs_over_rms": 0.34195420145988464
+  },
+  "q_per_token+kv_as_above+p_row": {
+   "rel_l2": 0.013088406063616276,
+   "max_abs_over_rms": 0.3479514718055725
+  },
+  "q_per_token+kv_as_above+p_block64": {
+   "rel_l2": 0.012354541569948196,
+   "max_abs_over_rms": 0.32516059279441833
+  },
+  "prod_all_per_tensor+p_row": {
+   "rel_l2": 0.01332995854318142,
+   "max_abs_over_rms": 0.4776952564716339
+  },
+  "mxf8_all": {
+   "rel_l2": 0.01527298241853714,
+   "max_abs_over_rms": 0.45997533202171326
+  },
+  "sw_qk_per_token_v_per_channel+p_row": {
+   "rel_l2": 0.013088406063616276,
+   "max_abs_over_rms": 0.3479514718055725
+  }
+ }
+}

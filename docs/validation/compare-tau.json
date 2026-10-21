@@ -1,0 +1,89 @@
+{
+ "tau=0.95": [
+  {
+   "prompt": "docs_needle-65536",
+   "kept": 0.49740162422986534,
+   "first_token_same": true,
+   "common_prefix": 363,
+   "agree": 365,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-131072",
+   "kept": 0.4761250900683101,
+   "first_token_same": true,
+   "common_prefix": 159,
+   "agree": 159,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-260096",
+   "kept": 0.4432213703211712,
+   "first_token_same": true,
+   "common_prefix": 130,
+   "agree": 131,
+   "needle_dense": true,
+   "needle_sparse": true
+  }
+ ],
+ "tau=0.9": [
+  {
+   "prompt": "docs_needle-65536",
+   "kept": 0.36662598648691563,
+   "first_token_same": true,
+   "common_prefix": 66,
+   "agree": 67,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-131072",
+   "kept": 0.3451511314172405,
+   "first_token_same": true,
+   "common_prefix": 18,
+   "agree": 20,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-260096",
+   "kept": 0.3180810931663697,
+   "first_token_same": true,
+   "common_prefix": 125,
+   "agree": 129,
+   "needle_dense": true,
+   "needle_sparse": true
+  }
+ ],
+ "tau=0.85": [
+  {
+   "prompt": "docs_needle-65536",
+   "kept": 0.2871961044683689,
+   "first_token_same": true,
+   "common_prefix": 61,
+   "agree": 64,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-131072",
+   "kept": 0.2673635760497054,
+   "first_token_same": true,
+   "common_prefix": 159,
+   "agree": 160,
+   "needle_dense": true,
+   "needle_sparse": true
+  },
+  {
+   "prompt": "docs_needle-260096",
+   "kept": 0.24412572685181821,
+   "first_token_same": true,
+   "common_prefix": 125,
+   "agree": 131,
+   "needle_dense": true,
+   "needle_sparse": true
+  }
+ ]
+}

@@ -1,0 +1,88 @@
+{
+ "runs": [
+  [
+   "stock",
+   "completed"
+  ],
+  [
+   "fused",
+   "completed"
+  ],
+  [
+   "sparse-sm120",
+   "completed"
+  ],
+  [
+   "sparse-sm120fp8",
+   "completed"
+  ],
+  [
+   "sparse-sm120fp8-tma",
+   "completed"
+  ],
+  [
+   "fp8gemm-sm120",
+   "completed"
+  ],
+  [
+   "fp8gemm-sm120fp8",
+   "completed"
+  ]
+ ],
+ "cases": {
+  "in65536-out65536-c1": {
+   "stock": 12062.8307575,
+   "fused": 11715.165635000001,
+   "sparse-sm120": 10539.691630000001,
+   "sparse-sm120fp8": 10143.975764499999,
+   "sparse-sm120fp8-tma": 9994.1153415,
+   "fp8gemm-sm120": 7215.1902355,
+   "fp8gemm-sm120fp8": 6677.233275
+  },
+  "in65536-out65536-c2": {
+   "stock": 18698.29624975,
+   "fused": 18137.2159415,
+   "sparse-sm120": 16425.16282125,
+   "sparse-sm120fp8": 15985.962763,
+   "sparse-sm120fp8-tma": 15779.9944005,
+   "fp8gemm-sm120": 11168.14630525,
+   "fp8gemm-sm120fp8": 10480.5665505
+  },
+  "in131072-out131072-c1": {
+   "stock": 30171.133675999998,
+   "fused": 29430.1161455,
+   "sparse-sm120": 24013.9719055,
+   "sparse-sm120fp8": 22627.7626285,
+   "sparse-sm120fp8-tma": 21973.458903,
+   "fp8gemm-sm120": 17329.3814095,
+   "fp8gemm-sm120fp8": 15202.8795865
+  },
+  "in131072-out131072-c2": {
+   "stock": 45770.51989525,
+   "fused": 44682.26623775,
+   "sparse-sm120": 36147.843103249994,
+   "sparse-sm120fp8": 34364.6849355,
+   "sparse-sm120fp8-tma": 33466.86575525,
+   "fp8gemm-sm120": 25768.08713,
+   "fp8gemm-sm120fp8": 23143.6348095
+  },
+  "in260096-out2048-c1": {
+   "stock": 81661.59151900001,
+   "fused": 80373.2480815,
+   "sparse-sm120": 57596.502749,
+   "sparse-sm120fp8": 52024.666521,
+   "sparse-sm120fp8-tma": 49445.653536,
+   "fp8gemm-sm120": 44330.39935,
+   "fp8gemm-sm120fp8": 36155.630216000005
+  },
+  "in260096-out2048-c2": {
+   "stock": 172196.9371955,
+   "fused": 121635.09503825,
+   "sparse-sm120": 82445.80272675,
+   "sparse-sm120fp8": 76414.2731545,
+   "sparse-sm120fp8-tma": 73330.68101975,
+   "fp8gemm-sm120": 62222.453104750006,
+   "fp8gemm-sm120fp8": 52799.44196975
+  }
+ }
+}
