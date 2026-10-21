@@ -61,7 +61,7 @@ At 8192 x 65536 on a shared GPU0: BF16 v2 39.8 ms, FP8 m64 30.9 ms, FP8 m128 25.
 Block-sparse lists for 128-row blocks are the union of the two 64-row lists
 (`tests/test_fa_bf16.to_lists_m128`). Kernel error vs an fp32 reference on the same
 e4m3 operands is 1-2e-2 (P rounding); on real activations the e4m3 probe gave 1-2.5% output
-error, and needle retrieval survives (see the deployment doc).
+error, and needle retrieval survives (see [deployment.md](deployment.md)).
 
 ## FP8 kernel optimisation round (2026-10-19, GPU7, 8192 x 65536 causal, dense)
 
