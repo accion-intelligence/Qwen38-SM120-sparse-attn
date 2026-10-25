@@ -1,30 +1,23 @@
-# KAI-Pikachu · One Day of Autonomous Optimization on SM120
+# Qwen-3.8-27B for SM120, delivered by KAI-Pikachu
 
-**These results were produced by KAI-Pikachu during one day of autonomous operation, without human supervision.**
+**An open-source optimization case study from [Accion Intelligence](https://accion-intelligence.com/),
+delivered by KAI-Pikachu after one day of autonomous, unattended operation.**
 
-The target was long-context prefill for **Qwen3.8-27B** on a single **RTX PRO 6000 Blackwell (SM120)**.
-The resulting implementation combines custom CuTe DSL FP8 attention kernels, dynamic block sparsity,
-and a small vLLM integration hook to accelerate 64K–256K-token inputs. This repository shares the
-optimization results, source code, evaluation scripts, and recorded measurements from that run.
+**KAI-Pikachu is Accion Intelligence's internal agent for end-to-end (E2E) GPU program performance
+optimization.** For this project, it ran for one day without human supervision to optimize
+**Qwen3.8-27B** long-context prefill on a single **RTX PRO 6000 Blackwell (SM120)**.
+
+The result spans custom CuTe DSL FP8 attention kernels, dynamic block-sparse prefill, vLLM integration,
+and output-quality and latency evaluation. This repository publishes the resulting code, evaluation
+scripts, and recorded measurements so the work can be inspected, reproduced, and built on.
 
 At 256K input length, the optimized BF16 GEMM configuration reduces time to first token from
 **81.66 s to 49.45 s (1.65×)**. Combining the attention kernels with vLLM's built-in FP8 GEMM brings
 that to **36.16 s**. The configurations and contributions behind these numbers are detailed below.
 
 [Deployment guide](docs/deployment.md) · [Full results](docs/results.md) ·
-[Kernel design](docs/kernels.md) · [Performance chart](docs/speedup.html)
-
-## What's included
-
-- **Custom FP8 and BF16 attention kernels.** The FP8 TMA kernel uses staged K/V transfers, mbarrier
-  pipelines, and register-resident attention probabilities, reaching **688 TFLOPS** in the dense
-  8K-query × 64K-key causal benchmark.
-- **Dynamic block-sparse prefill.** Attention blocks are selected per head and query block, with a
-  configurable attention-mass threshold and incremental caches for chunked prefill.
-- **vLLM integration.** A small, idempotent patch connects the kernels to vLLM 0.30.0. The release
-  targets prefill; decode uses vLLM's existing kernels.
-- **Evaluation tools.** Prompt construction, needle retrieval, teacher-forced output comparison,
-  and time-to-first-token benchmarks are included alongside the recorded validation results.
+[Kernel design](docs/kernels.md) · [Performance chart](docs/speedup.html) ·
+[About Accion Intelligence](#about-accion-intelligence)
 
 ## Measured performance
 
@@ -46,8 +39,22 @@ measured, so this column reports combined deployment latency.
 
 In the recorded teacher-forced evaluation, the sparse FP8 attention / BF16 GEMM variant has a mean
 **ΔNLL of +0.0032 nat** and **98.7% top-1 agreement** against the BF16 dense reference. Needle retrieval
-passed the single-request tests at 64K, 128K, and 256K. See [full results](docs/results.md) for methodology, concurrent requests,
-and output comparisons; raw records are in [`docs/validation/`](docs/validation/).
+passed the single-request tests at 64K, 128K, and 256K. See [full results](docs/results.md) for methodology,
+concurrent requests, and output comparisons; raw records are in [`docs/validation/`](docs/validation/).
+
+## What KAI-Pikachu delivered
+
+The artifacts from this run cover GPU kernels, serving integration, and measured application behavior:
+
+- **Custom FP8 and BF16 attention kernels.** The FP8 TMA kernel uses staged K/V transfers, mbarrier
+  pipelines, and register-resident attention probabilities, reaching **688 TFLOPS** in the dense
+  8K-query × 64K-key causal benchmark.
+- **Dynamic block-sparse prefill.** Attention blocks are selected per head and query block, with a
+  configurable attention-mass threshold and incremental caches for chunked prefill.
+- **vLLM integration.** A small, idempotent patch connects the kernels to vLLM 0.30.0. The release
+  targets prefill; decode uses vLLM's existing kernels.
+- **Evaluation tools.** Prompt construction, needle retrieval, teacher-forced output comparison,
+  and time-to-first-token benchmarks are included alongside the recorded validation results.
 
 ## Requirements
 
@@ -140,6 +147,16 @@ python tests/test_sparse_prefill_fp8.py
 - [ ] Measure the dense-attention + vLLM FP8 GEMM baseline
 - [ ] Optimize the decode path
 - [ ] Read an FP8 KV cache directly in the sparse kernel
+
+## About Accion Intelligence
+
+At **[Accion Intelligence](https://accion-intelligence.com/)**, we build software to unlock the performance
+of AI hardware. KAI-Pikachu brings our work on autonomous optimization to GPU programs end to end.
+This project makes one run's implementation and measured results available for the community to
+evaluate and build on.
+
+To explore optimization for your own GPU workloads, **[request a demo](https://accion-intelligence.com/demo)**
+or contact us at [hello@accion-intelligence.com](mailto:hello@accion-intelligence.com).
 
 ## License and acknowledgments
 
