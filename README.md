@@ -1,24 +1,31 @@
 # Qwen3.8 on RTX PRO 6000 (SM120): sparse FP8 attention
 
 **Built by KAI-Pikachu.** An optimised single-GPU deployment of **Qwen3.8-27B** on the
-**RTX PRO 6000 Blackwell (SM120)**: hand-written CuTe DSL attention kernels, dynamic block-sparse prefill and
-FP8 GEMMs, plugged into vLLM 0.30.0 through a five-line hook.
+**RTX PRO 6000 Blackwell (SM120)**: hand-written CuTe DSL FP8 attention kernels and dynamic block-sparse
+prefill, plugged into vLLM 0.30.0 through a five-line hook.
 
-| input | stock vLLM TTFT | this repo | speedup |
+Time to first token, single request, BF16 GEMMs on both sides (only attention differs):
+
+| input | stock vLLM | + KAI-Pikachu sparse FP8 attention | speedup |
 |---|---:|---:|---:|
-| 64K | 12.1 s | 6.7 s | **1.81×** |
-| 128K | 30.2 s | 15.2 s | **1.98×** |
-| 256K | 81.7 s | 36.2 s | **2.26×** |
+| 64K | 12.06 s | 9.99 s | **1.21×** |
+| 128K | 30.17 s | 21.97 s | **1.37×** |
+| 256K | 81.66 s | 49.45 s | **1.65×** |
 
 Needle retrieval intact; mean ΔNLL vs BF16 dense +0.003 nat. Attention kernel: 688 TFLOPS dense vs 305 for
 vLLM's FA2.
+
+The recommended deployment also enables vLLM's built-in FP8 W8A8 GEMM (`--quantization fp8`, not part of this
+work), reaching 6.68 / 15.20 / 36.16 s. The matching baseline (dense attention + vLLM FP8 GEMM) has not been
+measured yet, so the attention share of that total is not isolated; see [deployment notes](docs/deployment.md).
 
 Docs: [deployment notes](docs/deployment.md) · [full results](docs/results.md) ·
 [kernel details](docs/kernels.md) · interactive chart `docs/speedup.html`
 
 ## Roadmap
 
-- [x] Prefill: dynamic block-sparse FP8 attention + FP8 GEMM
+- [x] Prefill: dynamic block-sparse FP8 attention
+- [ ] Measure the dense-attention + vLLM FP8 GEMM baseline (TODO)
 - [ ] Decode (TODO)
 - [ ] FP8 KV cache read directly by the kernel (TODO)
 

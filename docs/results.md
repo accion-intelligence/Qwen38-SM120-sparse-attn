@@ -28,6 +28,9 @@ Block-sparse (per-head block lists, 40% of blocks): `kai_fa_fp8_tma` 11.5 ms (64
 | 256K, 2 concurrent | 172197* | 121635 | 82446 | 76414 | 73331 | 62222 | **52799** | 2.30x (vs ①) |
 
 \* the stock instance cannot hold two 256K contexts in its KV cache and queues the second request.
+B and C use vLLM's built-in FP8 W8A8 GEMM (`--quantization fp8`), which is not part of this work; "C vs stock"
+therefore mixes both. The attention-only gain is A vs stock: 1.21x / 1.37x / 1.65x at 64K / 128K / 256K
+(single request). Dense attention + FP8 GEMM has not been measured.
 Prefill chunk 12032 instead of 8192 (attention grid = whole waves on 188 SMs) gains another 1.9/1.9/2.6% at
 64K/128K/256K single request (`summary-chunk-gpu0.md`).
 

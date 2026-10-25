@@ -5,7 +5,8 @@ Full numbers are in [results.md](results.md), kernel internals in [kernels.md](k
 
 ## Recommended configuration
 
-All-FP8 (variant C): FP8 block-sparse attention + vLLM FP8 W8A8 GEMMs, prefill chunk 12032.
+Variant C: KAI-Pikachu FP8 block-sparse attention + vLLM's built-in FP8 W8A8 GEMM (`--quantization fp8`),
+prefill chunk 12032.
 
 ```bash
 export SM120_SPARSE_ATTN=1 SM120_SPARSE_KERNEL=sm120fp8 SM120_SPARSE_TAU=0.95
@@ -16,14 +17,19 @@ vllm serve Qwen/Qwen3.8-27B --dtype bfloat16 --quantization fp8 \
 
 | variant | attention | GEMM | TTFT 64K / 128K / 256K (s) | mean ΔNLL | top-1 agreement |
 |---|---|---|---|---:|---:|
-| stock vLLM | BF16 dense | BF16 | 12.06 / 30.17 / 81.66 | 0 | — |
-| A | FP8 sparse | BF16 | 9.99 / 21.97 / 49.45 | +0.0032 | 98.7% |
-| B | BF16 sparse | FP8 | 7.22 / 17.33 / 44.33 | +0.0023 | 97.4% |
-| **C** | **FP8 sparse** | **FP8** | **6.68 / 15.20 / 36.16** | **+0.0026** | **97.7%** |
+| stock vLLM | vLLM BF16 dense | vLLM BF16 | 12.06 / 30.17 / 81.66 | 0 | — |
+| A | **ours**, FP8 sparse | vLLM BF16 | 9.99 / 21.97 / 49.45 | +0.0032 | 98.7% |
+| B | **ours**, BF16 sparse | vLLM FP8 | 7.22 / 17.33 / 44.33 | +0.0023 | 97.4% |
+| C | **ours**, FP8 sparse | vLLM FP8 | 6.68 / 15.20 / 36.16 | +0.0026 | 97.7% |
+| *not measured* | vLLM BF16 dense | vLLM FP8 | — | — | — |
 
 Single request, prefill chunk 8192; chunk 12032 adds another ~2%. Needle retrieval passes for every variant.
 
-- FP8 GEMM gives the larger speedup: at 64K attention is only ~22% of TTFT.
+- **Our attention work alone:** A vs stock, 1.21× / 1.37× / 1.65× (same BF16 GEMM).
+- **vLLM's FP8 GEMM on top of A:** 1.50× / 1.45× / 1.37× (A → C). That is more than our attention gain at 64K
+  and 128K; only at 256K does attention dominate (attention is ~22% of TTFT at 64K). The stock → C ratio (1.81× / 1.98× / 2.26×) mixes both and must not be read as this repo's gain.
+  Isolating our share under FP8 GEMM needs the missing "dense + FP8 GEMM" row. B → C (our BF16 → our FP8
+  kernel, FP8 GEMM fixed) gives 1.08× / 1.14× / 1.23×, a lower bound on that share.
 - FP8 attention adds almost no error on top of sparsity (per-token |Δlogprob| 0.015 vs 0.015 at 64K);
   FP8 GEMM roughly doubles it, and C ≈ B in error. Pick A if output fidelity matters more than speed.
 - `--max-num-batched-tokens 12032` makes the attention grid (24 heads × 94 query blocks = 2256 CTAs) exactly
@@ -77,6 +83,7 @@ Details in [kernels.md](kernels.md).
 
 ## TODO
 
+- [ ] Measure dense attention + vLLM FP8 GEMM (stock + `--quantization fp8`) to isolate the attention gain in C.
 - [ ] Decode path optimisation (currently vLLM's stock decode kernels).
 - [ ] FP8 KV cache, read directly by the sparse kernel (removes the per-chunk gather + quantise + transpose).
 - [ ] Static per-layer FP8 scales from calibration.
